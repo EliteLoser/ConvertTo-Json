@@ -1,4 +1,4 @@
-﻿# Author: Joakim Borger Svendsen, 2017. http://www.json.org
+# Author: Joakim Borger Svendsen, 2017. http://www.json.org
 # Svendsen Tech. Public domain licensed code.
 # v0.3, 2017-04-12 (second release of the day, I actually read some JSON syntax this time)
 #       Fixed so you don't double-whack the allowed escapes from the diagram, not quoting null, false and true as values.
@@ -6,6 +6,7 @@
 # v0.5. Adding switch parameter EscapeAllowedEscapesToo (couldn't think of anything clearer),
 #       which also double-whacks (escapes with backslash) allowed escape sequences like \r, \n, \f, \b, etc.
 #       Still 2017-12-04.
+# v0.6: It's after midnight, so 2017-04-13 now. Added -QuoteValueTypes that makes it quote null, true and false as values.
 
 function ConvertToJsonInternal {
     param(
@@ -30,7 +31,7 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Found array, hash table or custom PowerShell object inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 12) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 12)) -replace '\s*,\s*$'
             }
-            elseif ($_ -match '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$|^(?:true|false|null)$') {
+            elseif ($_ -match $Script:NumberAndValueRegex) {
                 Write-Verbose -Message "Got a number, true, false or null inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $_
             }
@@ -63,7 +64,7 @@ function ConvertToJsonInternal {
                         Write-Verbose -Message "Found array, hash table or custom PowerShell object inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 8)) -replace '\s*,\s*$'
                     }
-                    elseif ($_ -match '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$|^(?:true|false|null)$') {
+                    elseif ($_ -match $Script:NumberAndValueRegex) {
                         Write-Verbose -Message "Got a number, true, false or null inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $_
                     }
@@ -74,7 +75,7 @@ function ConvertToJsonInternal {
                 }) -join ",`n") + "`n$(" " * (4 * ($WhiteSpacePad / 4) + 4 ))],`n"
             }
             else {
-                if ($InputObject.$Key -match '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$|^(?:true|false|null)$') {
+                if ($InputObject.$Key -match $Script:NumberAndValueRegex) {
                     $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": $($InputObject.$Key),`n"
                 }
                 else {
@@ -95,10 +96,15 @@ function ConvertTo-STJson {
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         $InputObject,
-        [switch] $EscapeAllowedEscapesToo)
+        [Switch] $EscapeAllowedEscapesToo,
+        [Switch] $QuoteValueTypes)
     begin{
         [String] $JsonOutput = ""
         $Collection = @()
+        [String] $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$|^(?:true|false|null)$'
+        if ($QuoteValueTypes) {
+            $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$'
+        }
     }
     process {
         # Hacking on pipeline support ...

@@ -7,6 +7,8 @@
 #       which also double-whacks (escapes with backslash) allowed escape sequences like \r, \n, \f, \b, etc.
 #       Still 2017-12-04.
 # v0.6: It's after midnight, so 2017-04-13 now. Added -QuoteValueTypes that makes it quote null, true and false as values.
+# v0.7: Changed parameter name from EscapeAllowedEscapesToo to EscapeAll (... seems obvious now). Best to do it before it's
+#       too late. 2017-04-13.
 
 function ConvertToJsonInternal {
     param(
@@ -96,7 +98,7 @@ function ConvertTo-STJson {
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         $InputObject,
-        [Switch] $EscapeAllowedEscapesToo,
+        [Switch] $EscapeAll,
         [Switch] $QuoteValueTypes)
     begin{
         [String] $JsonOutput = ""
@@ -121,7 +123,7 @@ function ConvertTo-STJson {
         else {
             $JsonOutput = ConvertToJsonInternal -InputObject $InputObject
         }
-        if ($EscapeAllowedEscapesToo) {
+        if ($EscapeAll) {
             ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" -replace '^\s*|\s*,\s*$' -replace '\\', '\\' -replace '\ *\]\ *$', ']'
         }
         else {

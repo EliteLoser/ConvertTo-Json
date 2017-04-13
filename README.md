@@ -14,8 +14,6 @@ Resulting JSON from ConvertTo-STJson:
 
 ![alt tag](/ConvertTo-STJson-complex-structure-json-output-example.png)
 
-== QuoteValueTypes parameter ==
-
 Demonstration of how -QuoteValueTypes will quote also "null", "true" and "false" as values/strings. Introduced in v0.6.
 
 ```powershell
@@ -31,8 +29,6 @@ PS C:\> ConvertTo-STJson @{ foo = 'null'; bar = 'anything' } -QuoteValueTypes
     "foo": "null"
 }
 ```
-== Compress parameter ==
-
 Demonstration of the -Compress parameter introduced in v0.8.
 
 ```powershell

@@ -9,6 +9,8 @@
 # v0.6: It's after midnight, so 2017-04-13 now. Added -QuoteValueTypes that makes it quote null, true and false as values.
 # v0.7: Changed parameter name from EscapeAllowedEscapesToo to EscapeAll (... seems obvious now). Best to do it before it's
 #       too late. 2017-04-13.
+# v0.7.1: Made the +/- after "e" in numbers optional as this is apparently valid (as plus, then)
+# v0.8: Added a -Compress parameter! 2017-04-13.
 
 function ConvertToJsonInternal {
     param(
@@ -99,13 +101,14 @@ function ConvertTo-STJson {
                    ValueFromPipelineByPropertyName=$true)]
         $InputObject,
         [Switch] $EscapeAll,
-        [Switch] $QuoteValueTypes)
+        [Switch] $QuoteValueTypes,
+        [Switch] $Compress)
     begin{
         [String] $JsonOutput = ""
         $Collection = @()
-        [String] $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$|^(?:true|false|null)$'
+        [String] $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]?\d+)?$|^(?:true|false|null)$'
         if ($QuoteValueTypes) {
-            $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]\d+)?$'
+            $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]?\d+)?$'
         }
     }
     process {
@@ -124,10 +127,38 @@ function ConvertTo-STJson {
             $JsonOutput = ConvertToJsonInternal -InputObject $InputObject
         }
         if ($EscapeAll) {
-            ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" -replace '^\s*|\s*,\s*$' -replace '\\', '\\' -replace '\ *\]\ *$', ']'
+            if ($Compress) {
+                (
+                    ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" `
+                        -replace '^\s*|\s*,\s*$' -replace '\\', '\\' -replace '\ *\]\ *$', ']'
+                ) -replace (
+                    '(?m)^\s*("(?:\\"|[^"])+"): ((?:"(?:\\"|[^"])+")|(?:null|true|false|(?:' + `
+                        $Script:NumberAndValueRegex.Trim('^$') + `
+                        ')))\s*(?<Comma>,)?\s*$'), "`${1}:`${2}`${Comma}`n" `
+                  -replace '(?m)^\s*|\s*\z|[\r\n]+'
+            }
+            else {
+                ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" `
+                    -replace '^\s*|\s*,\s*$' -replace '\\', '\\' -replace '\ *\]\ *$', ']'
+            }
         }
         else {
-            ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" -replace '^\s*|\s*,\s*$' -replace '\\(?!["/bfnrt]|u[0-9a-f]{4})', '\\' -replace '\ *\]\ *$', ']'
+            if ($Compress) {
+                (
+                    ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" `
+                        -replace '^\s*|\s*,\s*$' -replace '\\(?!["/bfnrt]|u[0-9a-f]{4})', '\\' `
+                        -replace '\ *\]\ *$', ']'
+                )  -replace (
+                    '(?m)^\s*("(?:\\"|[^"])+"): ((?:"(?:\\"|[^"])+")|(?:null|true|false|(?:' + `
+                        $Script:NumberAndValueRegex.Trim('^$') + `
+                        ')))\s*(?<Comma>,)?\s*$'), "`${1}:`${2}`${Comma}`n" `
+                  -replace '(?m)^\s*|\s*\z|[\r\n]+'
+            }
+            else {
+                ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" `
+                    -replace '^\s*|\s*,\s*$' -replace '\\(?!["/bfnrt]|u[0-9a-f]{4})', '\\' `
+                    -replace '\ *\]\ *$', ']'
+            }
         }
     }
 }

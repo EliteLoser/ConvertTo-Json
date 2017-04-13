@@ -29,6 +29,49 @@ PS C:\> ConvertTo-STJson @{ foo = 'null'; bar = 'anything' } -QuoteValueTypes
     "foo": "null"
 }
 ```
+Demonstration of when you might need the -EscapeAll parameter.
+
+```powershell
+PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, LastWriteTime | ConvertTo-STJson
+{
+    "FullName": "C:\temp\\wat.psd1",
+    "LastWriteTime": "03/09/2017 19:40:21"
+}
+
+PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, LastWriteTime | ConvertTo-STJson -EscapeAll
+{
+    "FullName": "C:\\temp\\wat.psd1",
+    "LastWriteTime": "03/09/2017 19:40:21"
+}
+```
+
+It appears that calculated properties cause bugs for currently unknown reasons. To work around something where you might want to add a property to multiple objects coming in via the pipeline, you will have to resort to ForEach-Object and the ConvertTo-STJson's -InputObject parameter. Demonstrated here.
+
+```powershell
+PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime |
+ForEach-Object { ConvertTo-STJson -EscapeAll -InputObject @{
+    FullName = $_.FullName
+    Name = $_.Name
+    LastWriteTime = $_.LastWriteTime
+    MeasuredTime = [DateTime]::Now # trying to add
+} }
+{
+    "FullName": "C:\\temp\\wat.psd1",
+    "Name": "wat.psd1",
+    "MeasuredTime": "04/13/2017 04:41:55",
+    "LastWriteTime": "03/09/2017 19:40:21"
+}
+
+PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime |
+ForEach-Object { ConvertTo-STJson -EscapeAll -InputObject @{
+    FullName = $_.FullName
+    Name = $_.Name
+    LastWriteTime = $_.LastWriteTime
+    MeasuredTime = [DateTime]::Now # trying to add
+} -Compress }
+{"FullName":"C:\\temp\\wat.psd1","Name":"wat.psd1","MeasuredTime":"04/13/2017 04:42:29","LastWriteTime":"03/09/2017 19:40:21"}
+```
+
 Demonstration of the -Compress parameter introduced in v0.8.
 
 ```powershell

@@ -11,6 +11,7 @@
 #       too late. 2017-04-13.
 # v0.7.1: Made the +/- after "e" in numbers optional as this is apparently valid (as plus, then)
 # v0.8: Added a -Compress parameter! 2017-04-13.
+# v0.8.1: Fixed bug that made "x.y" be quoted (but scientific numbers and integers worked all the while).
 
 function ConvertToJsonInternal {
     param(
@@ -106,9 +107,9 @@ function ConvertTo-STJson {
     begin{
         [String] $JsonOutput = ""
         $Collection = @()
-        [String] $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]?\d+)?$|^(?:true|false|null)$'
+        [String] $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$|^(?:true|false|null)$'
         if ($QuoteValueTypes) {
-            $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?e[+\-]?\d+)?$'
+            $Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
         }
     }
     process {

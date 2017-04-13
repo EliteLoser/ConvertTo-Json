@@ -29,4 +29,21 @@ PS C:\> ConvertTo-STJson @{ foo = 'null'; bar = 'anything' } -QuoteValueTypes
     "foo": "null"
 }
 ```
+Demonstration of the -Compress parameter introduced in v0.8.
 
+```powershell
+. C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1;
+@{
+    a = @{ a1 = 'val\t\nue1'; a2 = 'va\"lue2'; a3 = @(1, 't\wo\b---\f', 3) }
+    b = "test", "42.3e-10"
+    c = [pscustomobject] @{ c1 = 'value1'; c2 = "false"; c3 = "null" }
+    d = @( @{ foo = 'bar' }, @{ foo2 = 'bar2';
+    foo_inner_array = @( @{ deephash = @(@(1..4) + @('foobar', @{ hrm = 'hrmz' }));
+    deephash2 = [pscustomobject] @{ a = 1 } }  )})
+} | ConvertTo-STJson -Compress
+
+{"c":{"c1":"value1","c2":false,"c3":null},"d":[{"foo":"bar"},{"foo_inner_array":[
+{"deephash2":{"a":1},"deephash":[1,2,3,4,"foobar",{"hrm":"hrmz"}]}],"foo2":"bar2"
+}],"b":["test",42.3e-10],"a":{"a1":"val\t\nue1","a2":"va\"lue2","a3":[1,"t\\wo\b-
+--\f",3]}}
+```

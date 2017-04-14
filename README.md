@@ -105,7 +105,7 @@ I was using "-is [PSCustomObject]" to check and changed it to GetType().FullName
 
 ```powershell
 [PSCustomObject] @{ testkey = 'testvalue' } | Select *, @{ n='added'; e={'yep, added'}} |
-    %{ $_.added.GetType().FullName; $_ -is [PSCustomObject] }
+    %{ $_.added.GetType().FullName; $_.added -is [PSCustomObject] }
 System.String
 True
 ```

@@ -1,18 +1,18 @@
-# Author: Joakim Borger Svendsen, 2017. JSON info: http://www.json.org
+# Author: Joakim Borger Svendsen, 2017. http://www.json.org
 # Svendsen Tech. Public domain licensed code.
 # v0.3, 2017-04-12 (second release of the day, I actually read some JSON syntax this time)
 #       Fixed so you don't double-whack the allowed escapes from the diagram, not quoting null, false and true as values.
 # v0.4. Scientific numbers are supported (not quoted as values). 2017-04-12.
 # v0.5. Adding switch parameter EscapeAllowedEscapesToo (couldn't think of anything clearer),
 #       which also double-whacks (escapes with backslash) allowed escape sequences like \r, \n, \f, \b, etc.
-#       Still 2017-12-04.
+#       Still 2017-04-12.
 # v0.6: It's after midnight, so 2017-04-13 now. Added -QuoteValueTypes that makes it quote null, true and false as values.
 # v0.7: Changed parameter name from EscapeAllowedEscapesToo to EscapeAll (... seems obvious now). Best to do it before it's
 #       too late. 2017-04-13.
 # v0.7.1: Made the +/- after "e" in numbers optional as this is apparently valid (as plus, then)
 # v0.8: Added a -Compress parameter! 2017-04-13.
-# v0.8.1: Fixed bug that made "x.y" be quoted (but scientific numbers and integers worked all the while).
-# v0.8.2: Fixed bug with calculated properties (yay, this improves flexibility significantly).
+# v0.8.1: Fixed bug that made "x.y" be quoted (but scientific numbers and integers worked all the while). 2017-04-14.
+# v0.8.2: Fixed bug with calculated properties (yay, this improves flexibility significantly). 2017-04-14.
 
 function ConvertToJsonInternal {
     param(

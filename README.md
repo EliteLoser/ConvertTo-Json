@@ -100,3 +100,12 @@ As of v0.8.2, calculated properties also work.
     "testkey": "testvalue"
 }
 ```
+
+I was using "-is [PSCustomObject]" to check and changed it to GetType().FullName, because while the object is a System.String, PS still believes it's a PS custom object. As seen here:
+
+```powershell
+[PSCustomObject] @{ testkey = 'testvalue' } | Select *, @{ n='added'; e={'yep, added'}} |
+    %{ $_.added.GetType().FullName; $_ -is [PSCustomObject] }
+System.String
+True
+```

@@ -90,3 +90,13 @@ Demonstration of the -Compress parameter introduced in v0.8.
 }],"b":["test",42.3e-10],"a":{"a1":"val\t\nue1","a2":"va\"lue2","a3":[1,"t\\wo\b-
 --\f",3]}}
 ```
+
+As of v0.8.2, calculated properties also work.
+
+```powershell
+[PSCustomObject] @{ testkey = 'testvalue' } | Select *, @{ n='added'; e={'yep, added'}} | ConvertTo-STJson
+{
+    "added": "yep, added",
+    "testkey": "testvalue"
+}
+```

@@ -45,7 +45,21 @@ PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, LastWriteTime | ConvertTo-
 }
 ```
 
-It appears that calculated properties cause bugs for currently unknown reasons. To work around something where you might want to add a property to multiple objects coming in via the pipeline, you will have to resort to ForEach-Object and the ConvertTo-STJson's -InputObject parameter. Demonstrated here.
+For a while calculated properties caused bugs for now (sort of) known reasons, but it now works directly.
+
+```powershell
+Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
+    @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
+    ConvertTo-STJson
+{
+    "FullName": "C:\temp\\wat.psd1",
+    "LastWriteTime": "03/09/2017 19:40:21",
+    "MeasuredTime": "04/14/2017 18:26:35",
+    "Name": "wat.psd1"
+}
+```
+
+Here's a demonstration of how to do the same as above using a ForEach-Object and the -InputObject parameter working on $_ and its properties.
 
 ```powershell
 PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime |
@@ -61,15 +75,15 @@ ForEach-Object { ConvertTo-STJson -EscapeAll -InputObject @{
     "MeasuredTime": "04/13/2017 04:41:55",
     "LastWriteTime": "03/09/2017 19:40:21"
 }
+```
 
-PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime |
-ForEach-Object { ConvertTo-STJson -EscapeAll -InputObject @{
-    FullName = $_.FullName
-    Name = $_.Name
-    LastWriteTime = $_.LastWriteTime
-    MeasuredTime = [DateTime]::Now # trying to add
-} -Compress }
-{"FullName":"C:\\temp\\wat.psd1","Name":"wat.psd1","MeasuredTime":"04/13/2017 04:42:29","LastWriteTime":"03/09/2017 19:40:21"}
+With -Compress:
+
+```powershell
+Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
+    @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
+    ConvertTo-STJson -Compress
+{"FullName":"C:\temp\\wat.psd1","LastWriteTime":"03/09/2017 19:40:21","MeasuredTime":"04/14/2017 18:31:20","Name":"wat.psd1"}
 ```
 
 Demonstration of the -Compress parameter introduced in v0.8.

@@ -1,4 +1,4 @@
-# Author: Joakim Borger Svendsen, 2017. http://www.json.org
+# Author: Joakim Borger Svendsen, 2017. JSON info: http://www.json.org
 # Svendsen Tech. Public domain licensed code.
 # v0.3, 2017-04-12 (second release of the day, I actually read some JSON syntax this time)
 #       Fixed so you don't double-whack the allowed escapes from the diagram, not quoting null, false and true as values.
@@ -12,6 +12,7 @@
 # v0.7.1: Made the +/- after "e" in numbers optional as this is apparently valid (as plus, then)
 # v0.8: Added a -Compress parameter! 2017-04-13.
 # v0.8.1: Fixed bug that made "x.y" be quoted (but scientific numbers and integers worked all the while).
+# v0.8.2: Fixed bug with calculated properties (yay, this improves flexibility significantly).
 
 function ConvertToJsonInternal {
     param(
@@ -54,7 +55,8 @@ function ConvertToJsonInternal {
         Write-Verbose -Message "Building JSON for hash table or custom PowerShell object."
         $Json += "{`n"
         foreach ($Key in $Keys) {
-            if ($InputObject.$Key -is [HashTable] -or $InputObject.$Key -is [PSCustomObject]) {
+            # -is [PSCustomObject]) { # this was buggy with calculated properties, the value was thought to be PSCustomObject
+            if ($InputObject.$Key -is [HashTable] -or $InputObject.$Key.GetType().FullName -eq "System.Management.Automation.PSCustomObject") {
                 Write-Verbose -Message "Input object's value for key '$Key' is a hash table or custom PowerShell object."
                 $Json += " " * ($WhiteSpacePad + 4) + """$Key"":`n$(" " * ($WhiteSpacePad + 4))"
                 $Json += ConvertToJsonInternal -InputObject $InputObject.$Key -WhiteSpacePad ($WhiteSpacePad + 4)

@@ -50,11 +50,11 @@ For a while calculated properties caused bugs for now (sort of) known reasons, b
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
     @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
-    ConvertTo-STJson
+    ConvertTo-STJson -EscapeAll
 {
-    "FullName": "C:\temp\\wat.psd1",
+    "FullName": "C:\\temp\\wat.psd1",
     "LastWriteTime": "03/09/2017 19:40:21",
-    "MeasuredTime": "04/14/2017 18:26:35",
+    "MeasuredTime": "04/14/2017 18:32:34",
     "Name": "wat.psd1"
 }
 ```
@@ -82,11 +82,11 @@ With -Compress:
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
     @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
-    ConvertTo-STJson -Compress
-{"FullName":"C:\temp\\wat.psd1","LastWriteTime":"03/09/2017 19:40:21","MeasuredTime":"04/14/2017 18:31:20","Name":"wat.psd1"}
+    ConvertTo-STJson -Compress -EscapeAll
+{"FullName":"C:\\temp\\wat.psd1","LastWriteTime":"03/09/2017 19:40:21","MeasuredTime":"04/14/2017 18:31:20","Name":"wat.psd1"}
 ```
 
-Demonstration of the -Compress parameter introduced in v0.8.
+Another demonstration of the -Compress parameter introduced in v0.8.
 
 ```powershell
 . C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1;

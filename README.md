@@ -3,7 +3,7 @@
 ConvertTo-STJson is a basic PowerShell version 2-compatible ConvertTo-Json that's under heavy development as of 2017-04-18.
 You can read about JSON syntax here: http://json.org
 
-'''If you have PowerShell version 3 or higher, it's already built into the system.'''
+If you have PowerShell version 3 or higher, it's already built into the system.
 
 Online blog documentation: http://www.powershelladmin.com/wiki/ConvertTo-Json_for_PowerShell_version_2
 

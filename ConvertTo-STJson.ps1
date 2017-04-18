@@ -24,7 +24,12 @@
 # v0.9.2: Returning proper value types when sending in only single values of $true and $false (passed through). $null is buggy
 # v0.9.2.1: Forgot.
 # v0.9.2.2: Adding escaping of "solidus" (forward slash).
+# v0.9.3: Coerce numbers from strings only if -CoerceNumberStrings is specified (non-default), detect numerical types and
+#         by default omit double quotes only on these.
 
+# Take care of special characters in JSON (see json.org), such as newlines, backslashes
+# carriage returns and tabs.
+# '\\(?!["/bfnrt]|u[0-9a-f]{4})'
 function FormatString {
     param(
         [String] $String)
@@ -32,6 +37,28 @@ function FormatString {
     $String -replace '\\', '\\' -replace '\n', '\n' -replace '/', '\/' `
         -replace '\u0008', '\b' -replace '\u000C', '\f' -replace '\r', '\r' `
         -replace '\t', '\t' -replace '"', '\"'
+}
+
+# Meant to be used as the "end value". Adding coercion of strings that match numerical formats
+# supported by JSON as an optional, non-default feature (could actually be useful and save a lot of
+# calculated properties with casts before passing..).
+# If it's a number (or can be "coerced" to one), it'll be returned as a string containing the number,
+# if it's not a number, it'll be surrounded by double quotes as is the JSON requirement.
+function GetNumberOrString {
+    param(
+        $InputObject)
+    if ($InputObject -is [System.Byte] -or $InputObject -is [System.Int32] -or `
+        ($env:PROCESSOR_ARCHITECTURE -eq 'AMD64' -and $InputObject -is [System.Int64]) -or `
+        $InputObject -is [System.Decimal] -or $InputObject -is [System.Double] -or `
+        $InputObject -is [System.Single] -or $InputObject -is [long] -or `
+        ($Script:CoerceNumberStrings -and $InputObject -match $Script:NumberRegex)) {
+        Write-Verbose -Message "Got a number as end value."
+        "$InputObject"
+    }
+    else {
+        Write-Verbose -Message "Got a string as end value."
+        """$(FormatString -String $InputObject)"""
+    }
 }
 
 function ConvertToJsonInternal {
@@ -83,25 +110,16 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Found array, hash table or custom PowerShell object inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$'
             }
-            elseif ($_ -match $Script:NumberRegex) {
-                Write-Verbose -Message "Got a number inside array."
-                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + $_
-            }
             else {
-                Write-Verbose -Message "Got a string inside array."
-                $TempJsonString = FormatString -String $_ 
-                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + '"' + $TempJsonString + '"'
+                Write-Verbose -Message "Got a number or string inside array."
+                $TempJsonString = GetNumberOrString -InputObject $_
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + $TempJsonString
             }
         }) -join ",`n") + "`n$(" " * ((4 * ($WhiteSpacePad / 4)) + 4))],`n"
     }
-    elseif ($InputObject -match $Script:NumberRegex) {
-        Write-Verbose -Message "Input object is a number."
-        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $InputObject
-    }
     else {
-        Write-Verbose -Message "Input object is a single element."
-        $TempJsonString = FormatString -String $InputObject
-        '"' + $TempJsonString + '"'
+        Write-Verbose -Message "Input object is a single element (treated as string/number)."
+        GetNumberOrString -InputObject $InputObject
     }
     if ($Keys.Count) {
         Write-Verbose -Message "Building JSON for hash table or custom PowerShell object."
@@ -146,26 +164,18 @@ function ConvertToJsonInternal {
                         Write-Verbose -Message "Found array, hash table or custom PowerShell object inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 8)) -replace '\s*,\s*$'
                     }
-                    elseif ($_ -match $Script:NumberRegex) {
-                        Write-Verbose -Message "Got a number inside array inside inside array."
-                        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $_
-                    }
                     else {
-                        Write-Verbose -Message "Got a string inside inside array."
-                        $TempJsonString = FormatString -String $_
-                        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + '"' + $TempJsonString + '"'
+                        Write-Verbose -Message "Got a string or number inside inside array."
+                        $TempJsonString = GetNumberOrString -InputObject $_
+                        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $TempJsonString
                     }
                 }) -join ",`n") + "`n$(" " * (4 * ($WhiteSpacePad / 4) + 4 ))],`n"
-            }
-            elseif ($InputObject.$Key -match $Script:NumberRegex) {
-                Write-Verbose -Message "Got a number inside inside hashtable or PSObject."
-                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": $($InputObject.$Key),`n"
             }
             else {
                 Write-Verbose -Message "Got a string inside inside hashtable or PSObject."
                 # '\\(?!["/bfnrt]|u[0-9a-f]{4})'
-                $TempJsonString = FormatString -String $InputObject.$Key
-                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": ""$TempJsonString"",`n"
+                $TempJsonString = GetNumberOrString -InputObject $InputObject.$Key
+                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": $TempJsonString,`n"
             }
         }
         $Json = $Json -replace '\s*,$' # remove trailing comma that'll break syntax
@@ -182,11 +192,13 @@ function ConvertTo-STJson {
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         $InputObject,
-        [Switch] $Compress)
+        [Switch] $Compress,
+        [Switch] $CoerceNumberStrings = $false)
     begin{
         $JsonOutput = ""
         $Collection = @()
         # Not optimal, but the easiest now.
+        [bool] $Script:CoerceNumberStrings = $CoerceNumberStrings
         [String] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
         #$Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$|^(?:true|false|null)$'
     }

@@ -75,11 +75,11 @@ function ConvertToJsonInternal {
             }
             elseif ($_ -is [HashTable] -or $_.GetType().FullName -eq "System.Management.Automation.PSCustomObject" -or $_.GetType().Name -match '\[\]|Array') {
                 Write-Verbose -Message "Found array, hash table or custom PowerShell object inside array."
-                " " * ((4 * ($WhiteSpacePad / 4)) + 8) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 8)) -replace '\s*,\s*$'
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$'
             }
             elseif ($_ -match $Script:NumberRegex) {
                 Write-Verbose -Message "Got a number inside array."
-                " " * ((4 * ($WhiteSpacePad / 4)) + 8) + $_
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + $_
             }
             else {
                 Write-Verbose -Message "Got a string inside array."
@@ -153,7 +153,7 @@ function ConvertToJsonInternal {
             }
             elseif ($InputObject.$Key -match $Script:NumberRegex) {
                 Write-Verbose -Message "Got a number inside inside hashtable or PSObject."
-                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 8) + """$Key"": $($InputObject.$Key),`n"
+                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": $($InputObject.$Key),`n"
             }
             else {
                 Write-Verbose -Message "Got a string inside inside hashtable or PSObject."

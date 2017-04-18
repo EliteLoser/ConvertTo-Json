@@ -9,11 +9,11 @@ Online blog documentation: http://www.powershelladmin.com/wiki/ConvertTo-Json_fo
 
 Complex example object screenshot:
 
-![alt tag](/ConvertTo-STJson-complex-structure-example.png)
+![alt tag](/ConvertTo-STJson-complex-structure-example2.png)
 
 Resulting JSON from ConvertTo-STJson:
 
-![alt tag](/ConvertTo-STJson-complex-structure-json-output-example.png)
+![alt tag](/ConvertTo-STJson-complex-structure-json-output-example2.png)
 
 For a while calculated properties caused bugs for now (sort of) known reasons (some sort of inheritance), but it now works directly. I am looking into converting DateTime objects to a different type, like the PowerShell team's ConvertTo-Json does.
 

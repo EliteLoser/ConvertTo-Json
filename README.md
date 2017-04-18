@@ -85,16 +85,7 @@ As of v0.8.2, calculated properties also work.
 }
 ```
 
-I was using "-is [PSCustomObject]" to check and changed it to GetType().FullName, because while the object is a System.String, PS still believes it's a PS custom object. As seen here:
-
-```powershell
-[PSCustomObject] @{ testkey = 'testvalue' } | Select *, @{ n='added'; e={'yep, added'}} |
-    %{ $_.added.GetType().FullName; $_.added -is [PSCustomObject] }
-System.String
-True
-```
-
-A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version? Doh, of course they don't quote it if it's a _numerical type_, but mine forces numerical types on all strings that match numbers. I'll fix this in an upcoming version.
+A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version? ... No. Doh, of course they don't quote it if it's a _numerical type_, but mine forces numerical types on all strings that match numbers. I'll fix this in an upcoming version.
 
 ```powershell
 PS C:\temp> . C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1

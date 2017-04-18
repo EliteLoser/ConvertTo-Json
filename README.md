@@ -20,7 +20,7 @@ For a while calculated properties caused bugs for now (sort of) known reasons (s
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
     @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
-    ConvertTo-STJson -EscapeAll
+    ConvertTo-STJson
 {
     "FullName": "C:\\temp\\wat.psd1",
     "LastWriteTime": "03/09/2017 19:40:21",
@@ -33,7 +33,7 @@ Here's a demonstration of how to do the same as above using a ForEach-Object and
 
 ```powershell
 PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime |
-ForEach-Object { ConvertTo-STJson -EscapeAll -InputObject @{
+ForEach-Object { ConvertTo-STJson -InputObject @{
     FullName = $_.FullName
     Name = $_.Name
     LastWriteTime = $_.LastWriteTime
@@ -52,7 +52,7 @@ With -Compress:
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
     @{ Name = 'MeasuredTime'; Expression = { [DateTime]::Now } } |
-    ConvertTo-STJson -Compress -EscapeAll
+    ConvertTo-STJson -Compress
 {"FullName":"C:\\temp\\wat.psd1","LastWriteTime":"03/09/2017 19:40:21","MeasuredTime":"04/14/2017 18:31:20","Name":"wat.psd1"}
 ```
 

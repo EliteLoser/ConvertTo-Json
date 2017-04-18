@@ -20,7 +20,6 @@
 # but it's getting better. Datetime stuff is bothering me, not sure I like how it's handled in the PS team's cmdlet, but I
 # don't have a sufficiently informed opinion.
 
-
 function FormatString {
     param(
         [String] $String)
@@ -181,7 +180,7 @@ function ConvertTo-STJson {
         [String] $JsonOutput = ""
         $Collection = @()
         # Not optimal, but the easiest now.
-        [Regex] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
+        [String] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
         #$Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$|^(?:true|false|null)$'
     }
     process {
@@ -205,7 +204,7 @@ function ConvertTo-STJson {
                     -replace '^\s*|\s*,\s*$' -replace '\ *\]\ *$', ']'
             ) -replace ( # these next lines compress ...
                 '(?m)^\s*("(?:\\"|[^"])+"): ((?:"(?:\\"|[^"])+")|(?:null|true|false|(?:' + `
-                    $Script:NumberAndValueRegex.Trim('^$') + `
+                    $Script:NumberRegex.Trim('^$') + `
                     ')))\s*(?<Comma>,)?\s*$'), "`${1}:`${2}`${Comma}`n" `
               -replace '(?m)^\s*|\s*\z|[\r\n]+'
         }

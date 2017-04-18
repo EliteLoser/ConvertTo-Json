@@ -1,9 +1,9 @@
 # ConvertTo-Json
 
-ConvertTo-STJson is a basic PowerShell version 2-compatible ConvertTo-Json that's under heavy development as of 2017-04-14.
+ConvertTo-STJson is a basic PowerShell version 2-compatible ConvertTo-Json that's under heavy development as of 2017-04-18.
 You can read about JSON syntax here: http://json.org
 
-If you have PowerShell version 3 or higher, it's already built into the system.
+'''If you have PowerShell version 3 or higher, it's already built into the system.'''
 
 Online blog documentation: http://www.powershelladmin.com/wiki/ConvertTo-Json_for_PowerShell_version_2
 
@@ -15,38 +15,7 @@ Resulting JSON from ConvertTo-STJson:
 
 ![alt tag](/ConvertTo-STJson-complex-structure-json-output-example.png)
 
-Demonstration of how -QuoteValueTypes will quote also "null", "true" and "false" as values/strings. Introduced in v0.6.
-
-```powershell
-PS C:\> ConvertTo-STJson @{ foo = 'null'; bar = 'anything' }
-{
-    "bar": "anything",
-    "foo": null
-}
-
-PS C:\> ConvertTo-STJson @{ foo = 'null'; bar = 'anything' } -QuoteValueTypes
-{
-    "bar": "anything",
-    "foo": "null"
-}
-```
-Demonstration of when you might need the -EscapeAll parameter.
-
-```powershell
-PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, LastWriteTime | ConvertTo-STJson
-{
-    "FullName": "C:\temp\\wat.psd1",
-    "LastWriteTime": "03/09/2017 19:40:21"
-}
-
-PS C:\temp> Get-ChildItem wat.psd1 | Select FullName, LastWriteTime | ConvertTo-STJson -EscapeAll
-{
-    "FullName": "C:\\temp\\wat.psd1",
-    "LastWriteTime": "03/09/2017 19:40:21"
-}
-```
-
-For a while calculated properties caused bugs for now (sort of) known reasons, but it now works directly.
+For a while calculated properties caused bugs for now (sort of) known reasons (some sort of inheritance), but it now works directly. I am looking into converting DateTime objects to a different type, like the PowerShell team's ConvertTo-Json does.
 
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,

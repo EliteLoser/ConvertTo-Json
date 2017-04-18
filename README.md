@@ -117,3 +117,16 @@ PS C:\temp> $ComplexObject | ConvertTo-STJson -Compress
 :"null","falsestring":"false","nullvalue":null}]}],"foo2":"bar2"}],"b":["te\nst",42.3e-10],"a":{"a1":"val\\t\\nue1","a2":"va\\\"lue2","a3":[1,"t\\wo\\b---\\f",3]}}
 
 ```
+
+Passing through $null, $true and $false as of v0.9.2.
+
+```powershell
+PS C:\temp> ($true | ConvertTo-Json) -eq $false
+False
+
+PS C:\temp> ($false | ConvertTo-Json) -eq $false
+True
+
+PS C:\temp> ($null | ConvertTo-Json) -eq $null
+True
+```

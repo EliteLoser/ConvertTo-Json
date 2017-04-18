@@ -21,11 +21,14 @@
 # don't have a sufficiently informed opinion.
 #
 # v0.9.1: Formatting fixes.
-# v0.9.2: Returning proper value types when sending in only single values of $true and $false (passed through). $null is buggy
+# v0.9.2: Returning proper value types when sending in only single values of $true and $false (passed through).
+#         $null is buggy, but only if you pass in _nothing_ else, but $null. As a value in an array, hash or
+#         anywhere else, it works fine.
 # v0.9.2.1: Forgot.
 # v0.9.2.2: Adding escaping of "solidus" (forward slash).
-# v0.9.3: Coerce numbers from strings only if -CoerceNumberStrings is specified (non-default), detect numerical types and
+# v0.9.3: Coerce numbers from strings only if -CoerceNumberStrings is specified (non-default), properly detect numerical types and
 #         by default omit double quotes only on these.
+######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
 # carriage returns and tabs.
@@ -186,6 +189,7 @@ function ConvertToJsonInternal {
 
 function ConvertTo-STJson {
     [CmdletBinding()]
+    #[OutPutType([Void], [Bool], [String])]
     param(
         [AllowNull()]
         [Parameter(Mandatory=$true,
@@ -223,11 +227,11 @@ function ConvertTo-STJson {
         }
         elseif ($JsonOutput -is [bool] -and $JsonOutput -eq $true) {
             Write-Verbose -Message "Returning `$true."
-            [bool] $true
+            [bool] $true # doesn't preserve bool type :/ but works for comparisons against $true
         }
         elseif ($JsonOutput-is [bool] -and $JsonOutput -eq $false) {
             Write-Verbose -Message "Returning `$false."
-            [bool] $false
+            [bool] $false # doesn't preserve bool type :/ but works for comparisons against $false
         }
         elseif ($Compress) {
             Write-Verbose -Message "Compress specified."

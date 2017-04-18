@@ -28,6 +28,7 @@
 # v0.9.2.2: Adding escaping of "solidus" (forward slash).
 # v0.9.3: Coerce numbers from strings only if -CoerceNumberStrings is specified (non-default), properly detect numerical types and
 #         by default omit double quotes only on these.
+# v0.9.3.1: Respect and do not doublewhack/escape (regex) "\u[0-9a-f]{4}".
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -37,7 +38,7 @@ function FormatString {
     param(
         [String] $String)
     # Returned
-    $String -replace '\\', '\\' -replace '\n', '\n' -replace '/', '\/' `
+    $String -replace '\\(?!u[0-9a-f]{4})', '\\' -replace '\n', '\n' -replace '/', '\/' `
         -replace '\u0008', '\b' -replace '\u000C', '\f' -replace '\r', '\r' `
         -replace '\t', '\t' -replace '"', '\"'
 }

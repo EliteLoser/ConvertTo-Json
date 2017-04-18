@@ -124,3 +124,27 @@ I was using "-is [PSCustomObject]" to check and changed it to GetType().FullName
 System.String
 True
 ```
+
+A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version?
+
+```powershell
+PS C:\temp> . C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1
+
+PS C:\temp> $ComplexObject = @{
+    a = @{ a1 = 'val\t\nue1'; a2 = 'va\"lue2'; a3 = @(1, 't\wo\b---\f', 3) }
+    b = "te`nst", "42.3e-10"
+    c = [pscustomobject] @{ c1 = 'value1'; c2 = "false"; c3 = "null" }
+    d = @( @{ foo = 'bar' }, @{ foo2 = 'bar2';
+    foo_inner_array = @( @{ deephash = @(@(1..4) + @('foobar', @{ nullvalue = $null; nullstring = 'null';
+    trueval = $true; falseval = $false; falsestring = "false" }));
+    deephash2 = [pscustomobject] @{ a = 1.23 } }  )})
+}
+
+PS C:\temp> ($ComplexObject | ConvertTo-Json -Compress -Depth 99) -eq (($ComplexObject | ConvertTo-STJson -Compress) -replace "(42\.3e-10)", '"$1"')
+True
+
+PS C:\temp> $ComplexObject | ConvertTo-STJson -Compress
+{"c":{"c1":"value1","c2":"false","c3":"null"},"d":[{"foo":"bar"},{"foo_inner_array":[{"deephash2":{"a":1.23},"deephash":[1,2,3,4,"foobar",{"trueval":true,"falseval":false,"nullstring"
+:"null","falsestring":"false","nullvalue":null}]}],"foo2":"bar2"}],"b":["te\nst",42.3e-10],"a":{"a1":"val\\t\\nue1","a2":"va\\\"lue2","a3":[1,"t\\wo\\b---\\f",3]}}
+
+```

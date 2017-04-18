@@ -23,12 +23,13 @@
 # v0.9.1: Formatting fixes.
 # v0.9.2: Returning proper value types when sending in only single values of $true and $false (passed through). $null is buggy
 # v0.9.2.1: Forgot.
+# v0.9.2.2: Adding escaping of "solidus" (forward slash).
 
 function FormatString {
     param(
         [String] $String)
     # Returned
-    $String -replace '\\', '\\' -replace '\n', '\n' `
+    $String -replace '\\', '\\' -replace '\n', '\n' -replace '/', '\/' `
         -replace '\u0008', '\b' -replace '\u000C', '\f' -replace '\r', '\r' `
         -replace '\t', '\t' -replace '"', '\"'
 }

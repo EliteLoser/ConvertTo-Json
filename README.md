@@ -94,7 +94,7 @@ System.String
 True
 ```
 
-A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version?
+A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version? Doh, of course they don't quote it if it's a _numerical type_, but mine forces numerical types on all strings that match numbers. I'll fix this in an upcoming version.
 
 ```powershell
 PS C:\temp> . C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1

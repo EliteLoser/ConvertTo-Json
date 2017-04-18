@@ -118,15 +118,12 @@ PS C:\temp> $ComplexObject | ConvertTo-STJson -Compress
 
 ```
 
-Passing through $null, $true and $false as of v0.9.2.
+Passing through $true and $false as of v0.9.2, but it turns out $null is buggy. Will look into it.
 
 ```powershell
-PS C:\temp> ($true | ConvertTo-Json) -eq $false
-False
-
-PS C:\temp> ($false | ConvertTo-Json) -eq $false
+PS C:\temp> ($false | ConvertTo-STJson) -eq $false
 True
 
-PS C:\temp> ($null | ConvertTo-Json) -eq $null
+PS C:\temp> ($true | ConvertTo-STJson) -eq $true
 True
 ```

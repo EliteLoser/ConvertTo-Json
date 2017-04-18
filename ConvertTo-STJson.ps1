@@ -21,7 +21,8 @@
 # don't have a sufficiently informed opinion.
 #
 # v0.9.1: Formatting fixes.
-# v0.9.2: Returning proper value types when sending in only single values of $null, $true and $false (passed through).
+# v0.9.2: Returning proper value types when sending in only single values of $true and $false (passed through). $null is buggy
+# v0.9.2.1: Forgot.
 
 function FormatString {
     param(
@@ -175,6 +176,7 @@ function ConvertToJsonInternal {
 function ConvertTo-STJson {
     [CmdletBinding()]
     param(
+        [AllowNull()]
         [Parameter(Mandatory=$true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
@@ -204,15 +206,15 @@ function ConvertTo-STJson {
         }
         if ($null -eq $JsonOutput) {
             Write-Verbose -Message "Returning `$null."
-            $null
+            return $null # becomes an empty string :/
         }
         elseif ($JsonOutput -is [bool] -and $JsonOutput -eq $true) {
             Write-Verbose -Message "Returning `$true."
-            $true
+            [bool] $true
         }
         elseif ($JsonOutput-is [bool] -and $JsonOutput -eq $false) {
             Write-Verbose -Message "Returning `$false."
-            $false
+            [bool] $false
         }
         elseif ($Compress) {
             Write-Verbose -Message "Compress specified."

@@ -19,6 +19,9 @@
 # while if you have "\n" literally, it'll turn into \\n. Code quality improvements. Refactoring. Still some more to fix,
 # but it's getting better. Datetime stuff is bothering me, not sure I like how it's handled in the PS team's cmdlet, but I
 # don't have a sufficiently informed opinion.
+#
+# v0.9.1: Formatting fixes.
+# v0.9.2: Returning proper value types when sending in only single values of $null, $true and $false (passed through).
 
 function FormatString {
     param(
@@ -37,16 +40,17 @@ function ConvertToJsonInternal {
     $Keys = @()
     Write-Verbose -Message "WhiteSpacePad: $WhiteSpacePad."
     if ($null -eq $InputObject) {
-        Write-Verbose -Message "Got null in inner function"
-        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "null"
+        Write-Verbose -Message "Got 'null' in `$InputObject in inner function"
+        $null
     }
     elseif ($InputObject -is [bool] -and $InputObject -eq $true) {
         Write-Verbose -Message "Got 'true' in `$InputObject in inner function"
-        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "true"
+        $true
     }
     elseif ($InputObject -is [bool] -and $InputObject -eq $false) {
         Write-Verbose -Message "Got 'false' in `$InputObject in inner function"
-        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
+        #" " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
+        $false
     }
     elseif ($InputObject -is [HashTable]) {
         $Keys = @($InputObject.Keys)
@@ -177,7 +181,7 @@ function ConvertTo-STJson {
         $InputObject,
         [Switch] $Compress)
     begin{
-        [String] $JsonOutput = ""
+        $JsonOutput = ""
         $Collection = @()
         # Not optimal, but the easiest now.
         [String] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
@@ -198,7 +202,20 @@ function ConvertTo-STJson {
         else {
             $JsonOutput = ConvertToJsonInternal -InputObject $InputObject
         }
-        if ($Compress) {
+        if ($null -eq $JsonOutput) {
+            Write-Verbose -Message "Returning `$null."
+            $null
+        }
+        elseif ($JsonOutput -is [bool] -and $JsonOutput -eq $true) {
+            Write-Verbose -Message "Returning `$true."
+            $true
+        }
+        elseif ($JsonOutput-is [bool] -and $JsonOutput -eq $false) {
+            Write-Verbose -Message "Returning `$false."
+            $false
+        }
+        elseif ($Compress) {
+            Write-Verbose -Message "Compress specified."
             (
                 ($JsonOutput -split "\n" | Where-Object { $_ -match '\S' }) -join "`n" `
                     -replace '^\s*|\s*,\s*$' -replace '\ *\]\ *$', ']'

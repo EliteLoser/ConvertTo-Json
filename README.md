@@ -109,12 +109,32 @@ PS C:\temp> $ComplexObject | ConvertTo-STJson -Compress
 
 ```
 
-Passing through $true and $false as of v0.9.2, but it turns out $null is buggy. Will look into it.
+Passing through $true and $false as of v0.9.2, but it turns out $null is buggy, but only when passed in as a _single value_ (would essentially just be passed through). Will look into it. It works as a value anywhere else (array or PSobject/hash value).
 
 ```powershell
 PS C:\temp> ($false | ConvertTo-STJson) -eq $false
 True
 
 PS C:\temp> ($true | ConvertTo-STJson) -eq $true
+True
+```
+
+Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always?!).
+
+```powershell
+> $ComplexObject = @{
+    a = @{ a1 = "value`nwith`r`nnewlines"; a2 = 'va\"lue2'; a3 = @(1, 'tw"o"', 3) }
+    b = "test\u0123\foo", "42.3e-10", "2.34", 2.34
+    c = [pscustomobject] @{ c1 = 'value1'; c2 = "false"; c3 = "null" }
+    d = @( @{ foo = 'bar/barb' }, @{ foo2 = 'bar2';
+    foo_inner_array = @( @{ deephash = @(@(1..4) + @('foobar', 
+    @{ boobar = @{ nullvalue = $null; nullstring = 'null';
+    trueval = $true; falseval = $false; falsestring = "false" }}));
+    deephash2 = [pscustomobject] @{ a = 1.23 } }  )})
+}
+
+# PS team cmdlet output vs. mine (mine works on PSv2).
+> ($ComplexObject | ConvertTo-Json -Compress -Depth 99) -eq `
+  ($ComplexObject | ConvertTo-STJson -Compress)
 True
 ```

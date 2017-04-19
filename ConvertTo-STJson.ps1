@@ -77,11 +77,11 @@ function ConvertToJsonInternal {
         Write-Verbose -Message "Got 'null' in `$InputObject in inner function"
         $null
     }
-    elseif ($InputObject -is [bool] -and $InputObject -eq $true) {
+    elseif ($InputObject -is [Bool] -and $InputObject -eq $true) {
         Write-Verbose -Message "Got 'true' in `$InputObject in inner function"
         $true
     }
-    elseif ($InputObject -is [bool] -and $InputObject -eq $false) {
+    elseif ($InputObject -is [Bool] -and $InputObject -eq $false) {
         Write-Verbose -Message "Got 'false' in `$InputObject in inner function"
         #" " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
         $false
@@ -103,11 +103,11 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Got null inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "null"
             }
-            elseif ($_ -is [bool] -and $_ -eq $true) {
+            elseif ($_ -is [Bool] -and $_ -eq $true) {
                 Write-Verbose -Message "Got 'true' inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "true"
             }
-            elseif ($_ -is [bool] -and $_ -eq $false) {
+            elseif ($_ -is [Bool] -and $_ -eq $false) {
                 Write-Verbose -Message "Got 'false' inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "false"
             }
@@ -135,10 +135,10 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Got null as `$InputObject.`$Key in inner hash or PS object."
                 $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": null,`n"
             }
-            elseif ($InputObject.$Key -is [bool] -and $InputObject.$Key -eq $true) {
+            elseif ($InputObject.$Key -is [Bool] -and $InputObject.$Key -eq $true) {
                 Write-Verbose -Message "Got 'true' in `$InputObject.`$Key in inner hash or PS object."
                 $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": true,`n"            }
-            elseif ($InputObject.$Key -is [bool] -and $InputObject.$Key -eq $false) {
+            elseif ($InputObject.$Key -is [Bool] -and $InputObject.$Key -eq $false) {
                 Write-Verbose -Message "Got 'false' in `$InputObject.`$Key in inner hash or PS object."
                 $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": false,`n"
             }
@@ -156,11 +156,11 @@ function ConvertToJsonInternal {
                         Write-Verbose -Message "Got null inside array inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "null"
                     }
-                    elseif ($_ -is [bool] -and $_ -eq $true) {
+                    elseif ($_ -is [Bool] -and $_ -eq $true) {
                         Write-Verbose -Message "Got 'true' inside array inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "true"
                     }
-                    elseif ($_ -is [bool] -and $_ -eq $false) {
+                    elseif ($_ -is [Bool] -and $_ -eq $false) {
                         Write-Verbose -Message "Got 'false' inside array inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
                     }
@@ -191,7 +191,7 @@ function ConvertToJsonInternal {
 
 function ConvertTo-STJson {
     [CmdletBinding()]
-    #[OutPutType([Void], [Bool], [String])]
+    #[OutputType([Void], [Bool], [String])]
     param(
         [AllowNull()]
         [Parameter(Mandatory=$true,
@@ -204,7 +204,7 @@ function ConvertTo-STJson {
         $JsonOutput = ""
         $Collection = @()
         # Not optimal, but the easiest now.
-        [bool] $Script:CoerceNumberStrings = $CoerceNumberStrings
+        [Bool] $Script:CoerceNumberStrings = $CoerceNumberStrings
         [String] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
         #$Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$|^(?:true|false|null)$'
     }
@@ -227,13 +227,13 @@ function ConvertTo-STJson {
             Write-Verbose -Message "Returning `$null."
             return $null # becomes an empty string :/
         }
-        elseif ($JsonOutput -is [bool] -and $JsonOutput -eq $true) {
+        elseif ($JsonOutput -is [Bool] -and $JsonOutput -eq $true) {
             Write-Verbose -Message "Returning `$true."
-            [bool] $true # doesn't preserve bool type :/ but works for comparisons against $true
+            [Bool] $true # doesn't preserve bool type :/ but works for comparisons against $true
         }
-        elseif ($JsonOutput-is [bool] -and $JsonOutput -eq $false) {
+        elseif ($JsonOutput-is [Bool] -and $JsonOutput -eq $false) {
             Write-Verbose -Message "Returning `$false."
-            [bool] $false # doesn't preserve bool type :/ but works for comparisons against $false
+            [Bool] $false # doesn't preserve bool type :/ but works for comparisons against $false
         }
         elseif ($Compress) {
             Write-Verbose -Message "Compress specified."

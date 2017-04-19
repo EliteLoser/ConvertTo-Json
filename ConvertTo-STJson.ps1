@@ -30,6 +30,7 @@
 #         by default omit double quotes only on these.
 # v0.9.3.1: Respect and do not doublewhack/escape (regex) "\u[0-9a-f]{4}".
 # v0.9.3.2: Undoing previous change ... (wrong logic).
+# v0.9.3.3: Comparing to the PS team's ConvertTo-Json again and they don't escape "/" alone. Undoing 0.9.2.2 change.
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -38,8 +39,9 @@
 function FormatString {
     param(
         [String] $String)
-    # Returned
-    $String -replace '\\', '\\' -replace '\n', '\n' -replace '/', '\/' `
+    # removed: #-replace '/', '\/' `
+    # This is returned 
+    $String -replace '\\', '\\' -replace '\n', '\n' `
         -replace '\u0008', '\b' -replace '\u000C', '\f' -replace '\r', '\r' `
         -replace '\t', '\t' -replace '"', '\"'
 }

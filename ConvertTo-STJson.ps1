@@ -49,8 +49,9 @@ function FormatString {
 # Meant to be used as the "end value". Adding coercion of strings that match numerical formats
 # supported by JSON as an optional, non-default feature (could actually be useful and save a lot of
 # calculated properties with casts before passing..).
-# If it's a number (or can be "coerced" to one), it'll be returned as a string containing the number,
-# if it's not a number, it'll be surrounded by double quotes as is the JSON requirement.
+# If it's a number (or the parameter -CoerceNumberStrings is passed and it 
+# can be "coerced" into one), it'll be returned as a string containing the number.
+# If it's not a number, it'll be surrounded by double quotes as is the JSON requirement.
 function GetNumberOrString {
     param(
         $InputObject)
@@ -85,12 +86,11 @@ function ConvertToJsonInternal {
     }
     elseif ($InputObject -is [Bool] -and $InputObject -eq $false) {
         Write-Verbose -Message "Got 'false' in `$InputObject in inner function"
-        #" " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
         $false
     }
     elseif ($InputObject -is [HashTable]) {
         $Keys = @($InputObject.Keys)
-        Write-Verbose -Message "Input object is a hash table (Keys: $($Keys -join ', '))."
+        Write-Verbose -Message "Input object is a hash table (keys: $($Keys -join ', '))."
     }
     elseif ($InputObject.GetType().FullName -eq "System.Management.Automation.PSCustomObject") {
         $Keys = @(Get-Member -InputObject $InputObject -MemberType NoteProperty |

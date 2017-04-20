@@ -69,10 +69,9 @@ Another demonstration of the -Compress parameter introduced in v0.8.
     deephash2 = [pscustomobject] @{ a = 1 } }  )})
 } | ConvertTo-STJson -Compress
 
-{"c":{"c1":"value1","c2":false,"c3":null},"d":[{"foo":"bar"},{"foo_inner_array":[
-{"deephash2":{"a":1},"deephash":[1,2,3,4,"foobar",{"hrm":"hrmz"}]}],"foo2":"bar2"
-}],"b":["test","42.3e-10"],"a":{"a1":"val\t\nue1","a2":"va\"lue2","a3":[1,"t\\wo\
-b---\f",3]}}
+{"c":{"c1":"value1","c2":"false","c3":"null"},"d":[{"foo":"bar"},{"foo_inner_array":[{"dee
+phash2":{"a":1},"deephash":[1,2,3,4,"foobar",{"hrm":"hrmz"}]}],"foo2":"bar2"}],"b":["test"
+,"42.3e-10"],"a":{"a1":"val\\t\\nue1","a2":"va\\\"lue2","a3":[1,"t\\wo\\b---\\f",3]}}
 ```
 
 As of v0.8.2, calculated properties also work.
@@ -85,28 +84,23 @@ As of v0.8.2, calculated properties also work.
 }
 ```
 
-A little test of how standards-conforming it is. The PS team quotes scientific numbers, so I'm fixing that on the fly in mine. I think that's a small flaw in the PS team's version? ... No. Doh, of course they don't quote it if it's a _numerical type_, but mine forces numerical types on all strings that match numbers. I'll fix this in an upcoming version.
+A little test of how standards-conforming it is.
 
 ```powershell
-PS C:\temp> . C:\Dropbox\PowerShell\ConvertTo-Json\ConvertTo-STJson.ps1
-
-PS C:\temp> $ComplexObject = @{
+> $ComplexObject4 = @{
     a = @{ a1 = 'val\t\nue1'; a2 = 'va\"lue2'; a3 = @(1, 't\wo\b---\f', 3) }
     b = "te`nst", "42.3e-10"
     c = [pscustomobject] @{ c1 = 'value1'; c2 = "false"; c3 = "null" }
     d = @( @{ foo = 'bar' }, @{ foo2 = 'bar2';
-    foo_inner_array = @( @{ deephash = @(@(1..4) + @('foobar', @{ nullvalue = $null; nullstring = 'null';
+    foo_inner_array = @( @{ deephash = @(@(1..4) + @('foobar', 
+    @{ nullvalue = $null; nullstring = 'null';
     trueval = $true; falseval = $false; falsestring = "false" }));
     deephash2 = [pscustomobject] @{ a = 1.23 } }  )})
 }
 
-PS C:\temp> ($ComplexObject | ConvertTo-Json -Compress -Depth 99) -eq (($ComplexObject | ConvertTo-STJson -Compress) -replace "(42\.3e-10)", '"$1"')
+> ($ComplexObject4 | ConvertTo-Json -Compress -Depth 99) -eq `
+  ($ComplexObject4 | ConvertTo-STJson -Compress)
 True
-
-PS C:\temp> $ComplexObject | ConvertTo-STJson -Compress
-{"c":{"c1":"value1","c2":"false","c3":"null"},"d":[{"foo":"bar"},{"foo_inner_array":[{"deephash2":{"a":1.23},"deephash":[1,2,3,4,"foobar",{"trueval":true,"falseval":false,"nullstring"
-:"null","falsestring":"false","nullvalue":null}]}],"foo2":"bar2"}],"b":["te\nst",42.3e-10],"a":{"a1":"val\\t\\nue1","a2":"va\\\"lue2","a3":[1,"t\\wo\\b---\\f",3]}}
-
 ```
 
 Passing through $true and $false as of v0.9.2, but it turns out $null is buggy, but only when passed in as a _single value_ (would essentially just be passed through). Will look into it. It works as a value anywhere else (array or PSobject/hash value).
@@ -119,7 +113,7 @@ PS C:\temp> ($true | ConvertTo-STJson) -eq $true
 True
 ```
 
-Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always?!).
+Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always ...).
 
 ```powershell
 > $ComplexObject = @{

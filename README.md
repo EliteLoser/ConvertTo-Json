@@ -1,6 +1,6 @@
 # ConvertTo-Json
 
-ConvertTo-STJson is a basic PowerShell version 2-compatible ConvertTo-Json.
+ConvertTo-STJson is a basic pure-PowerShell ConvertTo-Json that's compatible with PowerShell version 2.
 
 You can read about JSON syntax here: http://json.org
 

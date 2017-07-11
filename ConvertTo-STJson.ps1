@@ -56,7 +56,7 @@ function GetNumberOrString {
     param(
         $InputObject)
     if ($InputObject -is [System.Byte] -or $InputObject -is [System.Int32] -or `
-        ($env:PROCESSOR_ARCHITECTURE -eq 'AMD64' -and $InputObject -is [System.Int64]) -or `
+        ($env:PROCESSOR_ARCHITECTURE -imatch '^(?:amd64|ia64)$' -and $InputObject -is [System.Int64]) -or `
         $InputObject -is [System.Decimal] -or $InputObject -is [System.Double] -or `
         $InputObject -is [System.Single] -or $InputObject -is [long] -or `
         ($Script:CoerceNumberStrings -and $InputObject -match $Script:NumberRegex)) {

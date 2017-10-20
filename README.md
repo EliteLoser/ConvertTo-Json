@@ -6,7 +6,7 @@ You can read about JSON syntax here: http://json.org
 
 If you have PowerShell version 3 or higher, it's already built into the system.
 
-Online blog documentation: http://www.powershelladmin.com/wiki/ConvertTo-Json_for_PowerShell_version_2
+Online blog documentation: https://www.powershelladmin.com/wiki/ConvertTo-Json_for_PowerShell_version_2
 
 Complex example object screenshot:
 

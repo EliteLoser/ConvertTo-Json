@@ -32,6 +32,7 @@
 # v0.9.3.2: Undoing previous change ... (wrong logic).
 # v0.9.3.3: Comparing to the PS team's ConvertTo-Json again and they don't escape "/" alone. Undoing 0.9.2.2 change.
 # v0.9.3.4: Support the IA64 platform and int64 on that too.
+# v0.9.4.0: Fix nested array bracket alignment issues. 2017-10-21.
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -101,7 +102,8 @@ function ConvertToJsonInternal {
     elseif ($InputObject.GetType().Name -match '\[\]|Array') {
         Write-Verbose -Message "Input object appears to be of a collection/array type."
         Write-Verbose -Message "Building JSON for array input object."
-        $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "[`n" + (($InputObject | ForEach-Object {
+        #$Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "[`n" + (($InputObject | ForEach-Object {
+        $Json += "[`n" + (($InputObject | ForEach-Object {
             if ($null -eq $_) {
                 Write-Verbose -Message "Got null inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "null"
@@ -116,14 +118,15 @@ function ConvertToJsonInternal {
             }
             elseif ($_ -is [HashTable] -or $_.GetType().FullName -eq "System.Management.Automation.PSCustomObject" -or $_.GetType().Name -match '\[\]|Array') {
                 Write-Verbose -Message "Found array, hash table or custom PowerShell object inside array."
-                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$'
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$' #-replace '\ {4}]', ']'
             }
             else {
                 Write-Verbose -Message "Got a number or string inside array."
                 $TempJsonString = GetNumberOrString -InputObject $_
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + $TempJsonString
             }
-        }) -join ",`n") + "`n$(" " * ((4 * ($WhiteSpacePad / 4)) + 4))],`n"
+        #}) -join ",`n") + "`n],`n"
+        }) -join ",`n") + "`n$(" " * (4 * ($WhiteSpacePad / 4)))],`n"
     }
     else {
         Write-Verbose -Message "Input object is a single element (treated as string/number)."

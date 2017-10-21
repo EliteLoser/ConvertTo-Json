@@ -116,7 +116,7 @@ Describe ConvertTo-STJson {
                 }).Count | Should -BeLessThan 1
             }
             catch {
-                throw "Invoke-ScriptAnalyzer gave a critical error."
+                throw "Invoke-ScriptAnalyzer gave a critical error: $_"
             }
         }
         else {

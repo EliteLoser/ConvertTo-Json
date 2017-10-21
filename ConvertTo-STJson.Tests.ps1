@@ -52,7 +52,7 @@ Describe ConvertTo-STJson {
             Should -Be "{`"Key`":false}"
     }
     It "Test single array with numbers, strings, null, true and false as values" {
-        ConvertTo-STJson -InputObject @(1, 2, 3, "test", $null, $true, $false, 'bar') -Compress |
+        ConvertTo-STJson -InputObject @(1, 2, 3, "test", $Null, $True, $False, 'bar') -Compress |
             Should -Be '[1,2,3,"test",null,true,false,"bar"]'
     }
     It "Test array as hashtable value, with numbers and strings" {
@@ -73,5 +73,23 @@ Describe ConvertTo-STJson {
             }
         } -Compress |
             Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar","a":"b"}}],"sleep":"mom"}}'
+    }
+    It "Test that compressed output from the PowerShell team's ConvertTo-Json is identical if on PSv3+, with complex object" {
+        if ($PSVersionTable.PSVersion.Major -lt 3) {
+            1 | Should -Be 1 # Can't test this on PSv2 or 1.
+            break
+        }
+        $Object = @{
+            a = @(1..3), 'a', 'b'
+            nested = @{
+                NestedMore = @(1, @{
+                    foo = @{ key = 'bar'; a = "b" }
+                })
+                sleep = 'mom'
+            }
+        }
+        (ConvertTo-Json -InputObject $Object -Compress -Depth 99) -eq (ConvertTo-STJson -InputObject $Object -Compress) |
+            Should -Be $True
+        
     }
 }

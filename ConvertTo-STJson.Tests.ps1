@@ -1,10 +1,7 @@
 #requires -version 2
 <#
-
 Pester 4.x tests for Svendsen Tech's ConvertTo-STJson. Joakim Borger Svendsen.
-
 Initially created on 2017-10-21.
-
 #>
 
 # Standardize the decimal separator to a period (not making it dynamic for now).

@@ -98,14 +98,14 @@ Describe ConvertTo-STJson {
         
     }
     
-    It "Test that double quotes are escaped within a string" {
-        ConvertTo-STJson -InputObject 'string with a "quoted" word' -Compress |
-            Should -Be '"string with a \"quoted\" word"'
+    It "Test that double quotes, newlines and carriage returns are escaped within a string" {
+        ConvertTo-STJson -InputObject "string with a`n newline a `r carriage return and a `"quoted`" word" -Compress |
+            Should -Be '"string with a\n newline a \r carriage return and a \"quoted\" word"'
     }
     
-    It "Test that double quotes are escaped within a string in a hashtable value" {
-        ConvertTo-STJson -InputObject @{ Key = 'string with a "quoted" word' } -Compress |
-            Should -Be '{"Key":"string with a \"quoted\" word"}'
+    It "Test that double quotes, newlines and carriage returns are escaped within a string in a hashtable value" {
+        ConvertTo-STJson -InputObject @{ Key = "string with a`n newline a `r carriage return and a `"quoted`" word" } -Compress |
+            Should -Be '{"Key":"string with a\n newline a \r carriage return and a \"quoted\" word"}'
     }
     
     It "Test indentation/formatting of a complex data structure" {

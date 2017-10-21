@@ -1,7 +1,10 @@
 #requires -version 2
 <#
+
 Pester 4.x tests for Svendsen Tech's ConvertTo-STJson. Joakim Borger Svendsen.
+
 Initially created on 2017-10-21.
+
 #>
 
 # Standardize the decimal separator to a period (not making it dynamic for now).
@@ -52,7 +55,8 @@ Describe ConvertTo-STJson {
             Should -Be "{`"Key`":false}"
     }
     It "Test single array with numbers, strings, null, true and false as values" {
-        ConvertTo-STJson -InputObject @(1, 2, 3, "test", $null, $true, $false, 'bar') -Compress | Should -Be '[1,2,3,"test",null,true,false,"bar"]'
+        ConvertTo-STJson -InputObject @(1, 2, 3, "test", $null, $true, $false, 'bar') -Compress |
+            Should -Be '[1,2,3,"test",null,true,false,"bar"]'
     }
     It "Test array as hashtable value, with numbers and strings" {
         # Test a PSCustomObject at the same time. PSv2-compatible syntax/creation (not ordered).
@@ -70,6 +74,7 @@ Describe ConvertTo-STJson {
                 })
                 sleep = 'mom'
             }
-        } -Compress | Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar","a":"b"}}],"sleep":"mom"}}'
+        } -Compress |
+            Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar","a":"b"}}],"sleep":"mom"}}'
     }
 }

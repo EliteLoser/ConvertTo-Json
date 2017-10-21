@@ -80,16 +80,73 @@ Describe ConvertTo-STJson {
             break
         }
         $Object = @{
-            a = @(1..3), 'a', 'b'
-            nested = @{
-                NestedMore = @(1, @{
-                    foo = @{ key = 'bar'; a = "b" }
-                })
-                sleep = 'mom'
-            }
-        }
+            a = @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') })
+            b = @{ a = @('y', 'z', @(1, @('innerinner', @('innerinnerinner', "innerinnerinner2", @{
+            innerkey = 'g' }, @{ inkey = 'f'} ), @(3,4) ) ) )} }
         (ConvertTo-Json -InputObject $Object -Compress -Depth 99) -eq (ConvertTo-STJson -InputObject $Object -Compress) |
             Should -Be $True
         
+    }
+    It "Test formatting of a complex data structure" {
+        ConvertTo-STJson -InputObject @{
+            a = @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') })
+            b = @{ a = @('y', 'z', @(1, @('innerinner', @('innerinnerinner', "innerinnerinner2", @{
+                innerkey = 'g' }, @{ inkey = 'f'} ), @(3,4) ) ) )} } |
+            Should -Be (
+@"
+{
+    "a":
+    [
+        [
+            1,
+            2,
+            3
+        ],
+        "a",
+        "b",
+        {
+            "key":
+            [
+                1,
+                [
+                    5,
+                    6,
+                    7
+                ],
+                "x"
+            ]
+        }
+    ],
+    "b":
+    {
+        "a":
+        [
+            "y",
+            "z",
+            [
+                1,
+                [
+                    "innerinner",
+                    [
+                        "innerinnerinner",
+                        "innerinnerinner2",
+                        {
+                            "innerkey": "g"
+                        },
+                        {
+                            "inkey": "f"
+                        }
+                    ],
+                    [
+                        3,
+                        4
+                    ]
+                ]
+            ]
+        ]
+    }
+}
+"@ -replace '\r') # \n becomes \r\n in this string, but is only \n in the JSON, 
+                  # so it breaks the comparison. Workaround. Can't have \r in the test data.
     }
 }

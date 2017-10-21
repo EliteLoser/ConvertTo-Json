@@ -84,7 +84,7 @@ Describe ConvertTo-STJson {
             Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar","a":"b"}}],"sleep":"mom"}}'
     }
     
-    It "Test that compressed output from the PowerShell team's ConvertTo-Json is identical if on PSv3+, with complex object" {
+    It "Test that compressed output from the built in ConvertTo-Json is identical if on PSv3+" {
         if ($PSVersionTable.PSVersion.Major -lt 3) {
             1 | Should -Be 1 # Can't test this on PSv2 or 1.
             break
@@ -108,6 +108,23 @@ Describe ConvertTo-STJson {
             Should -Be '{"Key":"string with a\n newline a \r carriage return and a \"quoted\" word"}'
     }
     
+    It "Test for PSScriptAnalyzer errors" {
+        if (Get-Command -Name "Invoke-ScriptAnalyzer" -ErrorAction SilentlyContinue) {
+            try {
+                @(Invoke-ScriptAnalyzer -Path "$MyScriptRoot\ConvertTo-STJson.ps1" -ErrorAction Stop | Where-Object {
+                    $_.Severity -notmatch 'Information|Warning'
+                }).Count | Should -BeLessThan 1
+            }
+            catch {
+                throw "Invoke-ScriptAnalyzer gave a critical error."
+            }
+        }
+        else {
+            1 | Should -Be 1 # can't test without PSScriptAnalyzer
+           break
+        }
+    }
+
     It "Test indentation/formatting of a complex data structure" {
         ConvertTo-STJson -InputObject @{
             a = @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') })

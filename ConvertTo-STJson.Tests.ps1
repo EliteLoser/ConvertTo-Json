@@ -1,10 +1,7 @@
-﻿#requires -version 2
+#requires -version 2
 <#
-
 Pester 4.x tests for Svendsen Tech's ConvertTo-STJson. Joakim Borger Svendsen.
-
 Initially created on 2017-10-21.
-
 #>
 
 # Standardize the decimal separator to a period (not making it dynamic for now).
@@ -64,15 +61,15 @@ Describe ConvertTo-STJson {
         }
         ConvertTo-STJson -InputObject $Number -Compress | Should -Be "{`"Key`":[0.0112,2,`"3`",`"foo`"]}"
     }
-    It "Test ridiculously complex/mixed data structure" {
+    It "Test complex/mixed data structure" {
         ConvertTo-STJson -InputObject @{
             a = @(1..3), 'a', 'b'
             nested = @{
                 NestedMore = @(1, @{
-                    foo = 'bar'
+                    foo = @{ key = 'bar'; a = "b" }
                 })
                 sleep = 'mom'
             }
-        } -Compress | Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":"bar"}],"sleep":"mom"}}'
+        } -Compress | Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar","a":"b"}}],"sleep":"mom"}}'
     }
 }

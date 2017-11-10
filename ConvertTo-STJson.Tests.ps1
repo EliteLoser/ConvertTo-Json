@@ -78,10 +78,9 @@ Describe ConvertTo-STJson {
                 NestedMore = @(1, @{
                     foo = @{ key = 'bar' }
                 })
-                sleep = 'mom'
             }
         } -Compress |
-            Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar"}}],"sleep":"mom"}}'
+            Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar"}}]}}'
     }
     
     It "Test that compressed output from the built in ConvertTo-Json is identical if on PSv3+" {

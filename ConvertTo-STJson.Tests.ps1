@@ -72,15 +72,15 @@ Describe ConvertTo-STJson {
     }
     
     It "Test complex/mixed data structure" {
-        ConvertTo-STJson -InputObject @{
-            a = @(1..3), 'a', 'b'
-            nested = @{
+        ConvertTo-STJson -InputObject @(
+            @(1..3), 'a', 'b',
+            @{
                 NestedMore = @(1, @{
                     foo = @{ key = 'bar' }
                 })
             }
-        } -Compress |
-            Should -Be '{"a":[[1,2,3],"a","b"],"nested":{"NestedMore":[1,{"foo":{"key":"bar"}}]}}'
+        ) -Compress |
+            Should -Be '[[1,2,3],"a","b",{"NestedMore":[1,{"foo":{"key":"bar"}}]}]'
     }
     
     It "Test that compressed output from the built in ConvertTo-Json is identical if on PSv3+" {

@@ -111,9 +111,10 @@ Describe ConvertTo-STJson {
     It "Test for PSScriptAnalyzer errors" {
         if (Get-Command -Name "Invoke-ScriptAnalyzer" -ErrorAction SilentlyContinue) {
             try {
-                @(Invoke-ScriptAnalyzer -Path "$MyScriptRoot\ConvertTo-STJson.ps1" -ErrorAction Stop | Where-Object {
-                    $_.Severity -notmatch 'Information|Warning'
-                }).Count | Should -BeLessThan 1
+                @(Invoke-ScriptAnalyzer -Path "$MyScriptRoot\ConvertTo-STJson.ps1" -ErrorAction Stop |
+                    Where-Object {
+                        $_.Severity -notmatch 'Information|Warning'
+                }).Count | Should -Be 0
             }
             catch {
                 throw "Invoke-ScriptAnalyzer gave a critical error: $_"
@@ -126,14 +127,15 @@ Describe ConvertTo-STJson {
     }
 
     It "Test indentation/formatting of a complex data structure" {
-        ConvertTo-STJson -InputObject @{
-            a = @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') })
-            b = @{ a = @('y', 'z', @(1, @('innerinner', @('innerinnerinner', "innerinnerinner2", @{
-                innerkey = 'g' }, @{ inkey = 'f'} ), @(3,4) ) ) )} } |
+        ConvertTo-STJson -InputObject @(
+            @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') }),
+            @{ a = @('y', 'z', @(1, @('innerinner', @('innerinnerinner',
+                $Null, "foo", @{
+                innerkey = 'g' }, @{ inkey = @{ x = 'f' } } ),
+                @(3,4) ) ) ) } ) |
             Should -Be (
 @"
-{
-    "a":
+[
     [
         [
             1,
@@ -155,7 +157,6 @@ Describe ConvertTo-STJson {
             ]
         }
     ],
-    "b":
     {
         "a":
         [
@@ -167,12 +168,16 @@ Describe ConvertTo-STJson {
                     "innerinner",
                     [
                         "innerinnerinner",
-                        "innerinnerinner2",
+                        null,
+                        "foo",
                         {
                             "innerkey": "g"
                         },
                         {
-                            "inkey": "f"
+                            "inkey":
+                            {
+                                "x": "f"
+                            }
                         }
                     ],
                     [
@@ -183,7 +188,7 @@ Describe ConvertTo-STJson {
             ]
         ]
     }
-}
+]
 "@ -replace '\r') # \n becomes \r\n in this string, but is only \n in the JSON, 
                   # so it breaks the comparison. Workaround. Can't have \r in the test data.
     }

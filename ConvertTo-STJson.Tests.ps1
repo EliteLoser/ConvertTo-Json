@@ -125,6 +125,13 @@ Describe ConvertTo-STJson {
         }
     }
 
+    It "Formats datetime objects as ISO 8601 when you specify the switch parameter" {
+        ConvertTo-STJson -InputObject @{ nest = 
+            @{ datetime = Get-Date -Year 2018 -Month 06 -Day 25 -Hour 00 -Minute 00 -Second 00 } } `
+            -Compress -DateTimeAsISO8601 |
+            Should -Be '{"nest":{"datetime":"2018-06-25T00:00:00"}}'
+    }
+
     It "Test indentation/formatting of a complex data structure" {
         ConvertTo-STJson -InputObject @(
             @(@(1..3), 'a', 'b', @{ key = @(1, @(5,6,7), 'x') }),

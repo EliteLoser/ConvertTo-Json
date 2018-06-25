@@ -37,6 +37,7 @@
 #           in the data.
 #           * Add the -DateTimeAsISO8601 switch parameter (causing datetime objects to be in this format:
 #           '2018-06-25T01:25:00').
+# v0.9.5.1: Handle "infinity" as well for System.Double.
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -64,7 +65,7 @@ function GetNumberOrString {
     if ($InputObject -is [System.Byte] -or $InputObject -is [System.Int32] -or `
         ($env:PROCESSOR_ARCHITECTURE -imatch '^(?:amd64|ia64)$' -and $InputObject -is [System.Int64]) -or `
         $InputObject -is [System.Decimal] -or `
-        ($InputObject -is [System.Double] -and -not [System.Double]::IsNaN($InputObject)) -or `
+        ($InputObject -is [System.Double] -and -not [System.Double]::IsNaN($InputObject) -and -not [System.Double]::IsInfinity($InputObject)) -or `
         $InputObject -is [System.Single] -or $InputObject -is [long] -or `
         ($Script:CoerceNumberStrings -and $InputObject -match $Script:NumberRegex)) {
         Write-Verbose -Message "Got a number as end value."

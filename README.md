@@ -1,6 +1,6 @@
 # ConvertTo-Json
 
-ConvertTo-STJson is a basic pure-PowerShell ConvertTo-Json that's compatible with PowerShell version 2.
+ConvertTo-STJson is a pure-PowerShell ConvertTo-Json that's compatible with PowerShell version 2.
 
 You can read about JSON syntax here: http://json.org
 
@@ -95,7 +95,7 @@ PS C:\temp> ($true | ConvertTo-STJson) -eq $true
 True
 ```
 
-Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always ...).
+Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always ...). As of 2018-06-25, I handle dates with the -DateTimeAsISO8601 parameter (terrible name). See below
 
 ```powershell
 > $ComplexObject = @{
@@ -113,4 +113,22 @@ Comparing my cmdlet to the PowerShell team's. DateTime objects are another story
 > ($ComplexObject | ConvertTo-Json -Compress -Depth 99) -eq `
   ($ComplexObject | ConvertTo-STJson -Compress)
 True
+```
+
+# DateTime handling
+
+Specify the -DateTimeAsISO8601 parameter (or just -date for short since it's uniquely identifying in the parameter set...) to get dates formatted in the format: `yyyy-MM-ddTHH:mm:ss` (e.g. `2018-06-25T12:29:00` for today at the time of writing).
+
+```powershell
+PS C:\temp> @{ key = @((get-date), (get-date).AddDays(-1)) } | convertto-stjson -DateTimeAsISO8601
+{
+    "key":
+    [
+        "2018-06-25T12:27:32",
+        "2018-06-24T12:27:32"
+    ]
+}
+
+PS C:\temp> @{ key = @((get-date), (get-date).AddDays(-1)) } | convertto-stjson -DateTimeAsISO8601 -Compress
+{"key":["2018-06-25T12:27:45","2018-06-24T12:27:45"]}
 ```

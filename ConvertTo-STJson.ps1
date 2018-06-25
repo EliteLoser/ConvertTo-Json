@@ -33,6 +33,10 @@
 # v0.9.3.3: Comparing to the PS team's ConvertTo-Json again and they don't escape "/" alone. Undoing 0.9.2.2 change.
 # v0.9.3.4: Support the IA64 platform and int64 on that too.
 # v0.9.4.0: Fix nested array bracket alignment issues. 2017-10-21.
+# v0.9.5.0: Handle NaN for [Double] so it's a string and doesn't break JSON syntax with "Nan" unquoted
+#           in the data.
+#           * Add the -DateTimeAsISO8601 switch parameter (causing datetime objects to be in this format:
+#           '2018-06-25T01:25:00').
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -59,14 +63,15 @@ function GetNumberOrString {
         $InputObject)
     if ($InputObject -is [System.Byte] -or $InputObject -is [System.Int32] -or `
         ($env:PROCESSOR_ARCHITECTURE -imatch '^(?:amd64|ia64)$' -and $InputObject -is [System.Int64]) -or `
-        $InputObject -is [System.Decimal] -or $InputObject -is [System.Double] -or `
+        $InputObject -is [System.Decimal] -or `
+        ($InputObject -is [System.Double] -and -not [System.Double]::IsNaN($InputObject)) -or `
         $InputObject -is [System.Single] -or $InputObject -is [long] -or `
         ($Script:CoerceNumberStrings -and $InputObject -match $Script:NumberRegex)) {
         Write-Verbose -Message "Got a number as end value."
         "$InputObject"
     }
     else {
-        Write-Verbose -Message "Got a string as end value."
+        Write-Verbose -Message "Got a string (or 'NaN') as end value."
         """$(FormatString -String $InputObject)"""
     }
 }
@@ -90,6 +95,10 @@ function ConvertToJsonInternal {
         Write-Verbose -Message "Got 'false' in `$InputObject in inner function"
         $false
     }
+    elseif ($InputObject -is [DateTime] -and $Script:DateTimeAsISO8601) {
+        Write-Verbose -Message "Got a DateTime and will format it as ISO 8601."
+        """$($InputObject.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"""
+    }
     elseif ($InputObject -is [HashTable]) {
         $Keys = @($InputObject.Keys)
         Write-Verbose -Message "Input object is a hash table (keys: $($Keys -join ', '))."
@@ -102,7 +111,6 @@ function ConvertToJsonInternal {
     elseif ($InputObject.GetType().Name -match '\[\]|Array') {
         Write-Verbose -Message "Input object appears to be of a collection/array type."
         Write-Verbose -Message "Building JSON for array input object."
-        #$Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "[`n" + (($InputObject | ForEach-Object {
         $Json += "[`n" + (($InputObject | ForEach-Object {
             if ($null -eq $_) {
                 Write-Verbose -Message "Got null inside array."
@@ -116,16 +124,19 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Got 'false' inside array."
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + "false"
             }
+            elseif ($_ -is [DateTime] -and $Script:DateTimeAsISO8601) {
+                Write-Verbose -Message "Got a DateTime and will format it as ISO 8601."
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$($_.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"""
+            }
             elseif ($_ -is [HashTable] -or $_.GetType().FullName -eq "System.Management.Automation.PSCustomObject" -or $_.GetType().Name -match '\[\]|Array') {
                 Write-Verbose -Message "Found array, hash table or custom PowerShell object inside array."
-                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$' #-replace '\ {4}]', ']'
+                " " * ((4 * ($WhiteSpacePad / 4)) + 4) + (ConvertToJsonInternal -InputObject $_ -WhiteSpacePad ($WhiteSpacePad + 4)) -replace '\s*,\s*$'
             }
             else {
                 Write-Verbose -Message "Got a number or string inside array."
                 $TempJsonString = GetNumberOrString -InputObject $_
                 " " * ((4 * ($WhiteSpacePad / 4)) + 4) + $TempJsonString
             }
-        #}) -join ",`n") + "`n],`n"
         }) -join ",`n") + "`n$(" " * (4 * ($WhiteSpacePad / 4)))],`n"
     }
     else {
@@ -148,6 +159,11 @@ function ConvertToJsonInternal {
                 Write-Verbose -Message "Got 'false' in `$InputObject.`$Key in inner hash or PS object."
                 $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": false,`n"
             }
+            elseif ($InputObject.$Key -is [DateTime] -and $Script:DateTimeAsISO8601) {
+                Write-Verbose -Message "Got a DateTime and will format it as ISO 8601."
+                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": ""$($InputObject.$Key.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"""
+                
+            }
             elseif ($InputObject.$Key -is [HashTable] -or $InputObject.$Key.GetType().FullName -eq "System.Management.Automation.PSCustomObject") {
                 Write-Verbose -Message "Input object's value for key '$Key' is a hash table or custom PowerShell object."
                 $Json += " " * ($WhiteSpacePad + 4) + """$Key"":`n$(" " * ($WhiteSpacePad + 4))"
@@ -169,6 +185,10 @@ function ConvertToJsonInternal {
                     elseif ($_ -is [Bool] -and $_ -eq $false) {
                         Write-Verbose -Message "Got 'false' inside array inside inside array."
                         " " * ((4 * ($WhiteSpacePad / 4)) + 8) + "false"
+                    }
+                    elseif ($_ -is [DateTime] -and $Script:DateTimeAsISO8601) {
+                        Write-Verbose -Message "Got a DateTime and will format it as ISO 8601."
+                        " " * ((4 * ($WhiteSpacePad / 4)) + 8) + """$($_.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"""
                     }
                     elseif ($_ -is [HashTable] -or $_.GetType().FullName -eq "System.Management.Automation.PSCustomObject" `
                         -or $_.GetType().Name -match '\[\]|Array') {
@@ -205,12 +225,14 @@ function ConvertTo-STJson {
                    ValueFromPipelineByPropertyName=$true)]
         $InputObject,
         [Switch] $Compress,
-        [Switch] $CoerceNumberStrings = $false)
+        [Switch] $CoerceNumberStrings = $false,
+        [Switch] $DateTimeAsISO8601 = $false)
     begin{
         $JsonOutput = ""
         $Collection = @()
         # Not optimal, but the easiest now.
         [Bool] $Script:CoerceNumberStrings = $CoerceNumberStrings
+        [Bool] $Script:DateTimeAsISO8601 = $DateTimeAsISO8601
         [String] $Script:NumberRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$'
         #$Script:NumberAndValueRegex = '^-?\d+(?:(?:\.\d+)?(?:e[+\-]?\d+)?)?$|^(?:true|false|null)$'
     }

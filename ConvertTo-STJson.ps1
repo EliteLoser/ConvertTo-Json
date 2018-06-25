@@ -38,6 +38,7 @@
 #           * Add the -DateTimeAsISO8601 switch parameter (causing datetime objects to be in this format:
 #           '2018-06-25T01:25:00').
 # v0.9.5.1: Handle "infinity" as well for System.Double.
+# v0.9.5.2: Fix bug with DateTime ISO formatting inside hash tables and PS objects.
 ######################################################################################################
 
 # Take care of special characters in JSON (see json.org), such as newlines, backslashes
@@ -162,7 +163,7 @@ function ConvertToJsonInternal {
             }
             elseif ($InputObject.$Key -is [DateTime] -and $Script:DateTimeAsISO8601) {
                 Write-Verbose -Message "Got a DateTime and will format it as ISO 8601."
-                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": ""$($InputObject.$Key.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"""
+                $Json += " " * ((4 * ($WhiteSpacePad / 4)) + 4) + """$Key"": ""$($InputObject.$Key.ToString('yyyy\-MM\-ddTHH\:mm\:ss'))"",`n"
                 
             }
             elseif ($InputObject.$Key -is [HashTable] -or $InputObject.$Key.GetType().FullName -eq "System.Management.Automation.PSCustomObject") {

@@ -1,6 +1,6 @@
 # Author: Joakim Borger Svendsen, 2017. 
 # JSON info: http://www.json.org
-# Svendsen Tech. Public domain licensed code.
+# Svendsen Tech. MIT License. Copyright Joakim Borger Svendsen / Svendsen Tech. 2016-present.
 # v0.3, 2017-04-12 (second release of the day, I actually read some JSON syntax this time)
 #       Fixed so you don't double-whack the allowed escapes from the diagram, not quoting null, false and true as values.
 # v0.4. Scientific numbers are supported (not quoted as values). 2017-04-12.

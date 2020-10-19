@@ -112,8 +112,8 @@ function ConvertToJsonInternal {
     }
     
     elseif ($InputObject -is [HashTable]) {
-        Write-Verbose -Message "Input object is a hash table (keys: $($Keys -join ', '))."
         $Keys = @($InputObject.Keys)
+        Write-Verbose -Message "Input object is a hash table (keys: $($Keys -join ', '))."
     }
     
     elseif ($InputObject.GetType().FullName -eq "System.Management.Automation.PSCustomObject") {

@@ -8,6 +8,9 @@ If you have PowerShell version 3 or higher, it's already built into the system.
 
 Online blog documentation: https://www.powershelladmin.com/wiki/ConvertTo-Json_for_PowerShell_version_2
 
+There's a "Send-STSplunkMessage" script/function in this repo here if you're interested in ad hoc splunking from PowerShell (v2 and up):
+https://github.com/EliteLoser/Send-SplunkMessage
+
 Complex example object screenshot:
 
 ![alt tag](/ConvertTo-STJson-complex-structure-example2.png)

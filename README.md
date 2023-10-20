@@ -19,7 +19,7 @@ Resulting JSON from ConvertTo-STJson:
 
 ![alt tag](/ConvertTo-STJson-complex-structure-json-output-example2.png)
 
-For a while calculated properties caused bugs for now (sort of) known reasons (some sort of inheritance), but it now works directly. I am looking into converting DateTime objects to a different type, like the PowerShell team's ConvertTo-Json does.
+For a while calculated properties caused bugs for now (sort of) known reasons (some sort of inheritance), but it now works directly. I implemented a conversion of DateTime objects to a different type, ISO8601 string `(2023-10-20T19:22:00)`, like the PowerShell team's ConvertTo-Json does (in unpredictable ways).
 
 ```powershell
 Get-ChildItem wat.psd1 | Select FullName, Name, LastWriteTime,
@@ -98,7 +98,7 @@ PS C:\temp> ($true | ConvertTo-STJson) -eq $true
 True
 ```
 
-Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I might go with a different approach than the PowerShell team there, but I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always ...). As of 2018-06-25, I handle dates with the -DateTimeAsISO8601 parameter (terrible name). See below
+Comparing my cmdlet to the PowerShell team's. DateTime objects are another story still. I'm unsure why they chose the \/Date(01234567...)\/ approach - and also with "meta properties" added (but not always...). As of 2018-06-25, I handle dates with the -DateTimeAsISO8601 parameter (terrible name). See the separate section below.
 
 ```powershell
 > $ComplexObject = @{
